@@ -66,5 +66,5 @@ python main.py
 | FedAvg    | `6.6133`    | `0.1757`       | `51.60%`   | `98.40%`      |
 | SCAFFOLD  | `1.6161`    | `0.0579`       | `89.20%`   | `99.40%`      |
 
-Localization means the model additionally train for 10 local epochs at the final evaluation phase, which is for adapting client’s local dataset.
+Localization means the model is trained for 10 local epochs additionally at the final evaluation phase, which is for adapting client’s local dataset.
 
