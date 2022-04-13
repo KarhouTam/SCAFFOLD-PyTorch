@@ -68,6 +68,8 @@ python main.py
 
 # Result
 
+FedAvg's result are from https://github.com/KarhouTam/Federated-Averaging-PyTorch
+
 | Algorithm | Global Loss | Localized Loss | Global Acc | Localized Acc |
 | --------- | ----------- | -------------- | ---------- | ------------- |
 | FedAvg    | `6.6133`    | `0.1757`       | `51.60%`   | `98.40%`      |
