@@ -1,0 +1,6 @@
+path~=16.4.0
+torch~=1.10.2
+numpy~=1.21.2
+fedlab~=1.1.4
+torchvision~=0.11.3
+tqdm~=4.62.3
