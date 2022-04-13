@@ -22,9 +22,16 @@ tqdm~=4.62.3
 pip install -r requirements.txt
 ```
 
-
+# Preprocess dataset
+  
+```python
+cd data/DATASET; python preprocess.py
+```
+The way of preprocessing is adjustable, more details in each dataset folder's `preprocess.py`.
 
 # Run the experiment
+
+Before run the experiment, please make sure that the dataset is downloaded and preprocessed already.
 
 It’s so simple.🤪
 
