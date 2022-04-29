@@ -43,7 +43,7 @@ python main.py
 
 ## Hyperparameters
 
-`--comms_round`: Num of communication rounds. Default: `40`
+`--comms_round`: Num of communication rounds. Default: `100`
 
 `--dataset`: Name of experiment dataset. Default: `cifar`
 
@@ -72,8 +72,8 @@ FedAvg's result are from https://github.com/KarhouTam/Federated-Averaging-PyTorc
 
 | Algorithm | Global Loss | Localized Loss | Global Acc | Localized Acc |
 | --------- | ----------- | -------------- | ---------- | ------------- |
-| FedAvg    | `6.6133`    | `0.1757`       | `51.60%`   | `98.40%`      |
-| SCAFFOLD  | `1.6161`    | `0.0579`       | `89.20%`   | `99.40%`      |
+| FedAvg    | `10.7461`    | `4.8648`       | `15.00%`   | `49.60%`      |
+| SCAFFOLD  | `10.6813`    | `3.7207`       | `20.40%`   | `58.40%`      |
 
 Localization means the model is trained for 10 local epochs additionally at the final evaluation phase, which is for adapting client’s local dataset.
 

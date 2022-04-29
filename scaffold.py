@@ -13,7 +13,9 @@ from math import ceil
 
 
 class SCAFFOLDTrainer(ClientTrainer):
-    def __init__(self, global_model, lr, criterion, epochs, cuda):
+    def __init__(
+        self, client_id, global_model, dataset, batch_size, lr, criterion, epochs, cuda
+    ):
         super().__init__(deepcopy(global_model), cuda and torch.cuda.is_available())
         self.global_model = global_model
         self.epochs = epochs
@@ -25,12 +27,20 @@ class SCAFFOLDTrainer(ClientTrainer):
             if param.requires_grad
         ]
         self.lr = lr
+        self.id = client_id
+        self.batch_size = batch_size
+        self.dataset = dataset
+        self.trainloader, self.valloader = get_dataloader(
+            client_id, dataset, batch_size
+        )
+        self.iter_trainloader = iter(self.trainloader)
+        self.iter_valloader = iter(self.valloader)
 
-    def train(self, client_id, global_model_parameters, c_global, dataset, batch_size):
-        trainloader, _ = get_dataloader(client_id, dataset, batch_size)
+    def train(self, global_model_parameters, c_global):
+
         SerializationTool.deserialize_model(self.model, global_model_parameters)
 
-        self._train(self.model, trainloader, c_global, self.epochs, client_id)
+        self._train(self.model, c_global, self.epochs)
         with torch.no_grad():
             y_delta = [torch.zeros_like(param) for param in self.model.parameters()]
             c_new = deepcopy(y_delta)
@@ -45,43 +55,64 @@ class SCAFFOLDTrainer(ClientTrainer):
                 y_del.data += param_l.data.detach() - param_g.data.detach()
 
             # update client's local control
-            a = ceil(len(trainloader.dataset) / batch_size) * self.epochs * self.lr
+            a = (
+                ceil(len(self.trainloader.dataset) / self.batch_size)
+                * self.epochs
+                * self.lr
+            )
             for c_n, c_l, c_g, diff in zip(c_new, self.c_local, c_global, y_delta):
                 c_n.data += c_l.data - c_g.data + diff.data / a
-
+            self.c_local = c_new
             # calc control_delta
             for c_d, c_n, c_l in zip(c_delta, c_new, self.c_local):
                 c_d.data += c_n.data - c_l.data
 
         return y_delta, c_delta
 
-    def eval(self, client_id, global_model_parameters, c_global, dataset, batch_size):
-        trainloader, testloader = get_dataloader(client_id, dataset, batch_size)
+    def eval(self, global_model_parameters, c_global):
         model_4_eval = deepcopy(self.model)
         SerializationTool.deserialize_model(model_4_eval, global_model_parameters)
         # evaluate global SCAFFOLD performance
-        loss_g, acc_g = evaluate(model_4_eval, testloader, self.criterion, self.device)
+        loss_g, acc_g = evaluate(
+            model_4_eval, self.valloader, self.criterion, self.device
+        )
         # localization
-        self._train(model_4_eval, trainloader, c_global, 10, client_id)
+        self._train(model_4_eval, c_global, self.id)
         # evaluate localized SCAFFOLD performance
-        loss_l, acc_l = evaluate(model_4_eval, testloader, self.criterion, self.device)
+        loss_l, acc_l = evaluate(
+            model_4_eval, self.valloader, self.criterion, self.device
+        )
         return loss_g, acc_g, loss_l, acc_l
 
-    def _train(self, model, trainloader, c_global, epochs, client_id):
+    def _train(self, model, c_global, epochs):
         model.train()
-        for _ in trange(epochs, desc="client [{}]".format(client_id)):
-            for x, y in trainloader:
-                x, y = x.to(self.device), y.to(self.device)
-                logit = model(x)
-                loss = self.criterion(logit, y)
-                gradients = torch.autograd.grad(loss, model.parameters())
-                with torch.no_grad():
-                    for param, grad, c_g, c_l in zip(
-                        model.parameters(), gradients, c_global, self.c_local
-                    ):
-                        c_g, c_l = c_g.to(self.device), c_l.to(self.device)
-                        param.data = param.data - self.lr * (
-                            grad.data + c_g.data - c_l.data
-                        )
-
+        for _ in trange(epochs, desc="client [{}]".format(self.id)):
+            x, y = self.get_data_batch(train=True)
+            logit = model(x)
+            loss = self.criterion(logit, y)
+            gradients = torch.autograd.grad(loss, model.parameters())
+            with torch.no_grad():
+                for param, grad, c_g, c_l in zip(
+                    model.parameters(), gradients, c_global, self.c_local
+                ):
+                    c_g, c_l = c_g.to(self.device), c_l.to(self.device)
+                    param.data = param.data - self.lr * (
+                        grad.data + c_g.data - c_l.data
+                    )
             self.lr *= 0.95
+
+    def get_data_batch(self, train: bool):
+        if train:
+            try:
+                data, targets = next(self.iter_trainloader)
+            except StopIteration:
+                self.iter_trainloader = iter(self.trainloader)
+                data, targets = next(self.iter_trainloader)
+        else:
+            try:
+                data, targets = next(self.iter_valloader)
+            except StopIteration:
+                self.iter_valloader = iter(self.valloader)
+                data, targets = next(self.iter_valloader)
+
+        return data.to(self.device), targets.to(self.device)

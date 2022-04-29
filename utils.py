@@ -14,6 +14,7 @@ def get_args(parser: ArgumentParser):
     parser.add_argument("--global_lr", type=float, default=1.0)
     parser.add_argument("--local_lr", type=float, default=5e-2)
     parser.add_argument("--cuda", type=bool, default=True)
+    parser.add_argument("--seed", type=int, default=0)
     return parser.parse_args()
 
 

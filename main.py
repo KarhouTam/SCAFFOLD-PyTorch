@@ -1,5 +1,5 @@
 import torch
-from random import sample
+import random
 from torch.nn import CrossEntropyLoss
 from scaffold import SCAFFOLDTrainer
 from utils import get_args, get_model
@@ -19,6 +19,9 @@ from data.synthetic import SyntheticDataset
 if __name__ == "__main__":
     parser = ArgumentParser()
     args = get_args(parser)
+    random.seed(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
     if args.cuda and torch.cuda.is_available():
         device = get_best_gpu()
     else:
@@ -36,18 +39,21 @@ if __name__ == "__main__":
     client_indices = range(client_num_in_total)
     client_list = [
         SCAFFOLDTrainer(
+            client_id=client_id,
             global_model=global_model,
+            dataset=args.dataset,
+            batch_size=args.batch_size,
             lr=args.local_lr,
             criterion=criterion,
             epochs=args.epochs,
             cuda=args.cuda,
         )
-        for _ in range(client_num_in_total)
+        for client_id in range(client_num_in_total)
     ]
 
     for r in trange(args.comms_round, desc="\033[1;33mtraining epoch\033[0m"):
         # select clients
-        selected_clients = sample(client_indices, args.client_num_per_round)
+        selected_clients = random.sample(client_indices, args.client_num_per_round)
         print(
             "\033[1;34mselected clients in round [{}]: {}\033[0m".format(
                 r, selected_clients
@@ -59,7 +65,7 @@ if __name__ == "__main__":
         # train
         for client_id in selected_clients:
             y_delta, c_delta = client_list[client_id].train(
-                client_id, global_model_param, c_global, args.dataset, args.batch_size
+                global_model_param, c_global
             )
             c_delta_buffer.append(c_delta)
             y_delta_buffer.append(y_delta)
@@ -82,7 +88,7 @@ if __name__ == "__main__":
     avg_loss_l = 0  # localized model loss
     avg_acc_l = 0  # localized model accuracy
     for r in trange(args.test_round, desc="\033[1;36mevaluating epoch\033[0m"):
-        selected_clients = sample(client_indices, args.client_num_per_round)
+        selected_clients = random.sample(client_indices, args.client_num_per_round)
         print(
             "\033[1;34mselected clients in round [{}]: {}\033[0m".format(
                 r, selected_clients
@@ -90,9 +96,7 @@ if __name__ == "__main__":
         )
         global_model_param = SerializationTool.serialize_model(global_model)
         for client_id in selected_clients:
-            stats = client_list[client_id].eval(
-                client_id, global_model_param, c_global, args.dataset, args.batch_size,
-            )
+            stats = client_list[client_id].eval(global_model_param, c_global)
             avg_loss_g += stats[0]
             avg_acc_g += stats[1]
             avg_loss_l += stats[2]
