@@ -63,6 +63,7 @@ python main.py
 
 `--model`: Structure of model. Must be `mlp` or `cnn`. Default: `cnn`
 
+`--seed`: Random seed for init model parameters and selected clients.
 
 
 
@@ -72,8 +73,8 @@ FedAvg's result are from https://github.com/KarhouTam/Federated-Averaging-PyTorc
 
 | Algorithm | Global Loss | Localized Loss | Global Acc | Localized Acc |
 | --------- | ----------- | -------------- | ---------- | ------------- |
-| FedAvg    | `10.7461`    | `4.8648`       | `15.00%`   | `49.60%`      |
-| SCAFFOLD  | `10.6813`    | `3.7207`       | `20.40%`   | `58.40%`      |
+| FedAvg    | `10.5450`   | `4.6780`       | `19.40%`   | `52.60%`      |
+| SCAFFOLD  | `10.7253`   | `3.9696`       | `20.60%`   | `58.40%`      |
 
 Localization means the model is trained for 10 local epochs additionally at the final evaluation phase, which is for adapting client’s local dataset.
 

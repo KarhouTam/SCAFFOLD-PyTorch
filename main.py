@@ -14,14 +14,15 @@ from os import listdir
 from data.cifar import CIFARDataset
 from data.mnist import MNISTDataset
 from data.synthetic import SyntheticDataset
-
 # ======================================================================
+
 if __name__ == "__main__":
     parser = ArgumentParser()
     args = get_args(parser)
     random.seed(args.seed)
     torch.manual_seed(args.seed)
     torch.cuda.manual_seed(args.seed)
+    torch.backends.cudnn.deterministic = True
     if args.cuda and torch.cuda.is_available():
         device = get_best_gpu()
     else:
