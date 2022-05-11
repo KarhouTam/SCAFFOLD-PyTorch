@@ -1,0 +1,6 @@
+__pycache__
+pickles
+cifar-10-batches-py
+MNIST
+.vscode
+.idea
