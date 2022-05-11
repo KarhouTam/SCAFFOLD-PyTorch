@@ -14,6 +14,7 @@ from os import listdir
 from data.cifar import CIFARDataset
 from data.mnist import MNISTDataset
 from data.synthetic import SyntheticDataset
+
 # ======================================================================
 
 if __name__ == "__main__":
@@ -81,7 +82,7 @@ if __name__ == "__main__":
             # update global_c
             for c_delta in c_delta_buffer:
                 for c_g, c_d in zip(c_global, c_delta):
-                    c_g.data += c_d.data / client_num_in_total
+                    c_g.data.add_(c_d.data / client_num_in_total)
 
     # evaluate
     avg_loss_g = 0  # global model loss

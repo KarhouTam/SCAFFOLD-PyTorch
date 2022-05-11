@@ -62,10 +62,10 @@ class SCAFFOLDTrainer(ClientTrainer):
             )
             for c_n, c_l, c_g, diff in zip(c_new, self.c_local, c_global, y_delta):
                 c_n.data += c_l.data - c_g.data - diff.data / a
-            self.c_local = c_new
             # calc control_delta
             for c_d, c_n, c_l in zip(c_delta, c_new, self.c_local):
-                c_d.data += c_n.data - c_l.data
+                c_d.data.add_(c_n.data - c_l.data)
+            self.c_local = c_new
 
         return y_delta, c_delta
 
