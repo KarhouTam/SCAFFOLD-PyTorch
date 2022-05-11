@@ -8,7 +8,7 @@ from fedlab.utils.serialization import SerializationTool
 from tqdm import trange
 from data import get_dataloader
 from copy import deepcopy
-from utils import evaluate
+from utils import evaluate, get_data_batch
 from math import ceil
 
 
@@ -87,7 +87,7 @@ class SCAFFOLDTrainer(ClientTrainer):
     def _train(self, model, c_global, epochs):
         model.train()
         for _ in trange(epochs, desc="client [{}]".format(self.id)):
-            x, y = self.get_data_batch(train=True)
+            x, y = get_data_batch(self.trainloader, self.iter_trainloader, self.device)
             logit = model(x)
             loss = self.criterion(logit, y)
             gradients = torch.autograd.grad(loss, model.parameters())
@@ -101,18 +101,4 @@ class SCAFFOLDTrainer(ClientTrainer):
                     )
             self.lr *= 0.95
 
-    def get_data_batch(self, train: bool):
-        if train:
-            try:
-                data, targets = next(self.iter_trainloader)
-            except StopIteration:
-                self.iter_trainloader = iter(self.trainloader)
-                data, targets = next(self.iter_trainloader)
-        else:
-            try:
-                data, targets = next(self.iter_valloader)
-            except StopIteration:
-                self.iter_valloader = iter(self.valloader)
-                data, targets = next(self.iter_valloader)
 
-        return data.to(self.device), targets.to(self.device)

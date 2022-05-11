@@ -65,3 +65,13 @@ def evaluate(model, testloader, criterion, gpu=None):
 
     acc = 100.0 * (correct / len(testloader.dataset))
     return loss, acc
+
+
+def get_data_batch(dataloader, iterator, device):
+    try:
+        data, targets = next(dataloader)
+    except StopIteration:
+        iterator = iter(dataloader)
+        data, targets = next(iterator)
+
+    return data.to(device), targets.to(device)
