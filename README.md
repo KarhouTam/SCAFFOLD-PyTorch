@@ -4,6 +4,8 @@ This repo is the implementation of [SCAFFOLD: Stochastic Controlled Averaging fo
 
 For simulating Non-I.I.D scenario, the dataset is split by labels and each client has only **two** classes of data.
 
+It's just a toy demo for demonstrating the algorithm, so take it easy.🤣
+
 # Requirements
 
 path~=16.4.0
@@ -20,6 +22,10 @@ tqdm~=4.62.3
 
 ```python
 pip install -r requirements.txt
+```
+or
+```python
+conda install --file requirements.txt
 ```
 
 # Preprocess dataset
@@ -41,7 +47,7 @@ python main.py
 
 
 
-## Hyperparameters
+# Hyperparameters
 
 `--comms_round`: Num of communication rounds. Default: `100`
 
