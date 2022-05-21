@@ -69,7 +69,7 @@ def evaluate(model, testloader, criterion, gpu=None):
 
 def get_data_batch(dataloader, iterator, device):
     try:
-        data, targets = next(dataloader)
+        data, targets = next(iterator)
     except StopIteration:
         iterator = iter(dataloader)
         data, targets = next(iterator)
