@@ -1,4 +1,5 @@
-# SCAFFOLD: Stochastic Controlled Averaging for Federated Learning [[ArXiv]](https://arxiv.org/abs/1910.06378) This repo is not maintained anymore, you can transfer to [FL-bench](https://github.com/KarhouTam/FL-bench), thanks guys!
+# SCAFFOLD: Stochastic Controlled Averaging for Federated Learning [[ArXiv]](https://arxiv.org/abs/1910.06378) 
+## This repo is not maintained anymore, you can transfer to [FL-bench](https://github.com/KarhouTam/FL-bench), thanks guys!
 
 This repo is the PyTorch implementation of SCAFFOLD.
 
